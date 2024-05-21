@@ -406,7 +406,7 @@ class TempCacheService:
     def update_from_key_temp_cache_and_value_parameter_temp_cache(self, key_temp_cache: str, value: object) -> None:
         self.__temp_cache[key_temp_cache] = value
 
-    def update_where_stream_notification_is_possible_from_key_temp_cache_and_value_parameter_temp_cache(self, key_temp_cache: str, value: object) -> None:
+    def update_where_stream_notification_is_possible_from_key_temp_cache_and_value_parameter_one(self, key_temp_cache: str, value: object) -> None:
         self.update_from_key_temp_cache_and_value_parameter_temp_cache(key_temp_cache,value)
         temp_cache_w_list_action: dict[str,list[Callable[[object], None]]] = self.__temp_cache_w_list_action
         if temp_cache_w_list_action.get(key_temp_cache) is None:
@@ -418,9 +418,41 @@ class TempCacheService:
     def delete_from_key_temp_cache_parameter_temp_cache(self, key_temp_cache: str) -> None:
         self.__temp_cache.pop(key_temp_cache)
 
-# HERE "EnumRWTMode" 
-# HERE "EnumRWTMode" 
-# HERE "EnumRWTMode" 
+@final
+class EnumRWTMode(Enum):
+    RELEASE = "release"
+    TEST = "test"
+
+@final
+class NamedCallback():
+    def __init__(self, name: str, callback: object) -> None:
+        self.NAME: str = name
+        self.CALLBACK: object = callback
+
+@final
+class RWTMode():
+    def __init__(self, enum_rwt_mode: EnumRWTMode, list_named_callback_w_release: list[NamedCallback], list_named_callback_w_test: list[NamedCallback]) -> None:
+        self.__ENUM_RWT_MODE: EnumRWTMode = enum_rwt_mode
+        self.__DICT_STR_W_NAMED_CALLBACK_W_RELEASE: dict[str,NamedCallback] = RWTMode.__get_dict_str_w_named_callback_from_list_named_callback(list_named_callback_w_release)
+        self.__DICT_STR_W_NAMED_CALLBACK_W_TEST: dict[str,NamedCallback] = RWTMode.__get_dict_str_w_named_callback_from_list_named_callback(list_named_callback_w_test)
+    
+    @staticmethod
+    def __get_dict_str_w_named_callback_from_list_named_callback(list_named_callback: list[NamedCallback]) -> dict[str,NamedCallback]:
+        dict_str_w_named_callback = dict[str,NamedCallback]()
+        for item_named_callback in list_named_callback:
+            dict_str_w_named_callback[item_named_callback.NAME] = item_named_callback
+        return dict_str_w_named_callback
+    
+    def get_named_callback_from_name(self, name: str) -> NamedCallback:
+        dict_str_w_named_callback_where_select_mod_parameters_three = self.__get_dict_str_w_named_callback_where_select_mod_parameters_three()
+        if dict_str_w_named_callback_where_select_mod_parameters_three.get(name) is None:
+            raise LocalException("RWTMode",EnumGuilty.DEVELOPER,"RWTModeQQGetNamedCallbackFromName","no exists key: " + name)
+        return dict_str_w_named_callback_where_select_mod_parameters_three.get(name)
+
+    def __get_dict_str_w_named_callback_where_select_mod_parameters_three(self) -> dict[str,NamedCallback]:
+        if self.__ENUM_RWT_MODE == EnumRWTMode.RELEASE:
+            return self.__DICT_STR_W_NAMED_CALLBACK_W_RELEASE
+        return self.__DICT_STR_W_NAMED_CALLBACK_W_TEST
 
 @final
 class Result():
