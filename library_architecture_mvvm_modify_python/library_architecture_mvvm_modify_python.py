@@ -3,7 +3,6 @@ from enum import Enum
 from typing import Callable, TypeVar, Generic, final
 
 QENUM = TypeVar("QENUM", bound=Enum)
-QOBJECT = TypeVar("QOBJECT", bound=object)
 
 @final
 class ExceptionController():
@@ -26,6 +25,11 @@ class ExceptionController():
     
     def is_where_not_equals_null_parameter_exception(self) -> bool:
         return self.__EXCEPTION != None
+    
+    def to_string(self) -> str:
+        if self.__EXCEPTION is None:
+            return "ExceptionController(exception: null)"
+        return "ExceptionController(exception: " + self.__EXCEPTION.to_string() + ")"
 
 class BaseDataForNamed(Generic[QENUM], ABC):
     def __init__(self, is_loading: bool) -> None:
@@ -36,12 +40,19 @@ class BaseDataForNamed(Generic[QENUM], ABC):
     def get_enum_data_for_named(self) -> QENUM:
         pass
 
+    @abstractmethod
+    def to_string(self) -> str:
+        pass
+
 class BaseException(Exception, ABC):
     def __init__(self, this_class: str, exception_class: str, key: str) -> None:
-        super.__init__(key)
         self.KEY: str = key
         self.__THIS_CLASS: str = this_class
         self.__EXCEPTION_CLASS: str = exception_class
+
+    @abstractmethod
+    def to_string(self) -> str:
+        pass
     
     ### Call this method in the descendant constructor as the last line
     def _debug_print_exception_where_to_string_parameters_this_class_and_exception_class(self) -> None:
@@ -51,10 +62,6 @@ class BaseException(Exception, ABC):
             "NameException(Class) --> " + self.__EXCEPTION_CLASS + "\n" +
             "toString() --> " + self.to_string())
         debug_print_exception("\n===end_to_trace_exception===\n")
-    
-    @abstractmethod
-    def to_string(self) -> str:
-        pass
 
 @final
 class EnumGuilty(Enum):
@@ -163,15 +170,6 @@ class NetworkException(BaseException):
     def to_string(self) -> str:
         return "NetworkException(key: " + self.KEY + ", " + "statusCode: " + self.STATUS_CODE + ", " + "nameStatusCode (optional): " + self.NAME_STATUS_CODE + ", " + "descriptionStatusCode (optional): " + self.DESCRIPTION_STATUS_CODE + ")"
 
-class IIterator(Generic[QOBJECT], ABC):
-    @abstractmethod
-    def current(self) -> QOBJECT:
-        pass
-    
-    @abstractmethod
-    def move_next(self) -> bool:
-        pass
-
 class BaseModel(ABC):
     def __init__(self, unique_id: str) -> None:
         self.UNIQUE_ID: str = unique_id
@@ -180,27 +178,35 @@ class BaseModel(ABC):
     def get_clone(self) -> 'BaseModel':
         pass
 
+    @abstractmethod
+    def to_string(self) -> str:
+        pass
+
 QBASEMODEL = TypeVar("QBASEMODEL", bound=BaseModel)
+
+@final
+class CurrentModelWIndex(Generic[QBASEMODEL], ABC):
+    def __init__(self, current_model: QBASEMODEL, index: int) -> None:
+        self.CURRENT_MODEL: QBASEMODEL = current_model
+        self.INDEX: int = index
     
-class BaseModelWNamedWNamedWNamedIterator(IIterator[QBASEMODEL], Generic[QBASEMODEL], ABC):
+class BaseModelWNamedWNamedWNamedIterator(Generic[QBASEMODEL], ABC):
     def __init__(self) -> None:
         self._LIST_MODEL_ITERATOR: list[QBASEMODEL] = []
     
     @abstractmethod
-    def current(self) -> QBASEMODEL:
+    def current_model_w_index(self) -> CurrentModelWIndex[QBASEMODEL]:
         pass
-
-    def move_next(self) -> bool:
-        return len(self._LIST_MODEL_ITERATOR) > 0
 
     def get_sorted_list_model_from_new_list_model_parameter_list_model_iterator(self, new_list_model: list[QBASEMODEL]) -> list[QBASEMODEL]:
         if len(new_list_model) <= 0:
             return []
         self._LIST_MODEL_ITERATOR.extend(new_list_model)
         new_list_model_first = []
-        while self.move_next():
-            new_model = self.current()
-            new_list_model_first.append(new_model)
+        while len(self._LIST_MODEL_ITERATOR) > 0:
+            current_model_w_index = self.current_model_w_index()
+            self._LIST_MODEL_ITERATOR.pop(current_model_w_index.INDEX)
+            new_list_model_first.append(current_model_w_index.CURRENT_MODEL)
         return new_list_model_first
 
 class BaseListModel(Generic[QBASEMODEL], ABC):
@@ -209,6 +215,10 @@ class BaseListModel(Generic[QBASEMODEL], ABC):
     
     @abstractmethod
     def get_clone(self) -> 'BaseListModel':
+        pass
+
+    @abstractmethod
+    def to_string(self) -> str:
         pass
 
     def sorting_from_model_w_named_w_named_w_named_iterator_parameter_list_model(self,model_w_named_w_named_w_named_iterator: BaseModelWNamedWNamedWNamedIterator[QBASEMODEL]) -> None:

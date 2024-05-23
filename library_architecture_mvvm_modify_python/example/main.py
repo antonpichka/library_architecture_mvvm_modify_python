@@ -60,7 +60,7 @@ class ListIPAddress(Generic[T],BaseListModel[T]):
     def to_string(self) -> str:
         str_list_model = "\n"
         for item_model in self.LIST_MODEL:
-            str_list_model += item_model + ",\n"
+            str_list_model += item_model.to_string() + ",\n"
         return "ListIPAddress(listModel: [" + str_list_model + "])"
 
 ### This class needs to be called where there are network requests (in the data source), 
@@ -76,12 +76,15 @@ class HttpService():
         return cls.__instance
 
 class GetEEIPAddressEEWhereJsonipAPIEEParameterHttpService():
-    async def get_ip_address_where_jsonip_api_parameter_http_service() -> Result:
+    def __init__(self) -> None:
+        self._http_service: HttpService = HttpService()
+
+    async def get_ip_address_where_jsonip_api_parameter_http_service(self) -> Result:
         try:
-            response: requests.Response = await requests.request("GET","https://jsonip.com/")
+            response: requests.Response = requests.request("GET","https://jsonip.com/")
             if response.status_code != 200:
                 raise NetworkException.from_key_and_status_code("GetEEIPAddressEEWhereJsonipAPIEEParameterHttpService",str(response.status_code),response.status_code)
-            json: dict[str,object] = await response.json()
+            json: dict[str,object] = response.json()
             ip_address = IPAddress(json.get(KeysHttpServiceUtility.IP_ADDRESS_QQ_IP))
             return Result.success(ip_address)
         except NetworkException as network_exception:
@@ -107,17 +110,20 @@ class DataForMainVM(BaseDataForNamed[EnumDataForMainVM]):
         if self.exception_controller.is_where_not_equals_null_parameter_exception():
             return EnumDataForMainVM.EXCEPTION
         return EnumDataForMainVM.SUCCESS
+    
+    def to_string(self) -> str:
+        return "DataForMainVM(is_loading: " + str(self.is_loading) + ", " + "exception_controller: " + self.exception_controller.to_string() + ", " + "ip_address: " + self.ip_address.to_string() + ")"
 
 @final
 class MainVM():
     def __init__(self) -> None:
         ## OperationEEModel(EEWhereNamed)[EEFromNamed]EEParameterNamedService
-        self.__GET_EE_IP_ADDRESS_EE_WHERE_JSONIP_API_EE_PARAMETER_HTTP_SERVICE = GetEEIPAddressEEWhereJsonipAPIEEParameterHttpService()
+        self.__GET_EE_IP_ADDRESS_EE_WHERE_JSONIP_API_EE_PARAMETER_HTTP_SERVICE: GetEEIPAddressEEWhereJsonipAPIEEParameterHttpService = GetEEIPAddressEEWhereJsonipAPIEEParameterHttpService()
         ## NamedUtility
         
-        ## Main objects
+        ## Main objects 
         self.__NAMED_STREAM_W_STATE: BaseNamedStreamWState[DataForMainVM] = DefaultStreamWState[DataForMainVM](DataForMainVM(True,IPAddress("")))
-        self.__RWT_MODE = RWTMode(
+        self.__RWT_MODE: RWTMode = RWTMode(
             EnumRWTMode.RELEASE,
             [
                 NamedCallback("init",self.__init_release_callback)
@@ -126,13 +132,15 @@ class MainVM():
                 NamedCallback("init",self.__init_test_callback)
             ]
         )
-        self.__init_async()
     
-    async def __init_async(self) -> None:
+    async def init(self) -> None:
         self.__NAMED_STREAM_W_STATE.listen_stream_data_for_named_from_callback(self.__listen_stream_data_w_named_w_callback)
         result = await self.__RWT_MODE.get_named_callback_from_name("init").CALLBACK()
         debug_print("MainVM: " + result)
         self.__NAMED_STREAM_W_STATE.notify_stream_data_for_named()
+
+    def dispose(self) -> None:
+        self.__NAMED_STREAM_W_STATE.dispose()
     
     def __build(self) -> None:
         data_for_named = self.__NAMED_STREAM_W_STATE.get_data_for_named()
@@ -142,7 +150,7 @@ class MainVM():
             case EnumDataForMainVM.EXCEPTION:
                 debug_print("Build: Exception(" + data_for_named.exception_controller.get_key_parameter_exception() + ")")
             case EnumDataForMainVM.SUCCESS:
-                debug_print("Build: Success(" + data_for_named.ip_address + ")")
+                debug_print("Build: Success(" + data_for_named.ip_address.to_string() + ")")
 
     def __listen_stream_data_w_named_w_callback(self, _: DataForMainVM) -> None:
         self.__build()
@@ -163,16 +171,18 @@ class MainVM():
         self.__NAMED_STREAM_W_STATE.get_data_for_named().ip_address = ip_address.get_clone()
         return KeysSuccessUtility.SUCCESS
     
-    async def __first_qq_init_release_callback_qq_get_ip_address_where_jsonip_api_parameter_http_service(self,exception_controller: ExceptionController) -> str:
+    def __first_qq_init_release_callback_qq_get_ip_address_where_jsonip_api_parameter_http_service(self,exception_controller: ExceptionController) -> str:
         self.__NAMED_STREAM_W_STATE.get_data_for_named().is_loading = False
         self.__NAMED_STREAM_W_STATE.get_data_for_named().exception_controller = exception_controller
         return exception_controller.get_key_parameter_exception()
 
-def main():
-    MainVM()
+async def main() -> None:
+    main_vm = MainVM()
+    await main_vm.init()
+    main_vm.dispose()
 
-if __name__ == "__main__":
-    main()
+loop = asyncio.get_event_loop()
+loop.run_until_complete(main())
 ## EXPECTED OUTPUT:
 ##
 ## MainVM: SUCCESS

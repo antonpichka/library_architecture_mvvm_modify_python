@@ -12,7 +12,14 @@ setup(
     maintainer_email="antonpichka@gmail.com",
     url="https://github.com/antonpichka/library_architecture_mvvm_modify_python",
     license="MIT",
+    packages=["named_test_main"],
     py_modules=[
         "library_architecture_mvvm_modify_python",
     ],
+    entry_points={
+        "console_scripts": [
+            "iterator_test_main = named_test_main.iterator_test_main:main",
+            "temp_cache_test_main = named_test_main.temp_cache_test_main:main",
+        ]
+    }
 )
