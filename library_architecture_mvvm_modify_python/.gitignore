@@ -2,6 +2,7 @@
 [Dd]ebug/
 [Rr]elease/
 __pycache__
+dist/
 build/
 *.egg-info/
 *.slo

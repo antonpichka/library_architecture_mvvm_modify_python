@@ -6,4 +6,4 @@
 
 | Package                                                                                                               | PYPI                                                                                                                                          |
 |-----------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------|
-| [library_architecture_mvvm_modify_python](https://github.com/antonpichka/library_architecture_mvvm_modify_python/tree/main/library_architecture_mvvm_modify_python) | Coming Soon |
+| [library_architecture_mvvm_modify_python](https://github.com/antonpichka/library_architecture_mvvm_modify_python/tree/main/library_architecture_mvvm_modify_python) | [PYPI](https://pypi.org/project/library-architecture-mvvm-modify-python/) |
