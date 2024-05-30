@@ -2,8 +2,9 @@ import asyncio
 import requests
 from enum import Enum
 from typing import Generic, TypeVar, final
-from library_architecture_mvvm_modify_python import debug_print, BaseModel, BaseListModel, NetworkException, Result, LocalException, EnumGuilty, BaseDataForNamed, BaseNamedStreamWState, RWTMode, EnumRWTMode, DefaultStreamWState, NamedCallback,  ExceptionController
+from library_architecture_mvvm_modify_python import *
 
+@final
 class KeysHttpServiceUtility():
     # IPAddress #
     IP_ADDRESS_QQ_IP: str = "ip"
@@ -14,6 +15,7 @@ class KeysHttpServiceUtility():
     def __init__(self):
         pass
 
+@final
 class KeysExceptionUtility():
     # UNKNOWN #
     UNKNOWN = "UNKNOWN"
@@ -24,6 +26,7 @@ class KeysExceptionUtility():
     def __init__(self):
         pass
 
+@final
 class KeysSuccessUtility():
     # SUCCESS #
     SUCCESS = "SUCCESS"
@@ -52,7 +55,7 @@ class ListIPAddress(Generic[T],BaseListModel[T]):
         super().__init__(list_model)
     
     def get_clone(self) -> 'ListIPAddress':
-        new_list_model = list[T]
+        new_list_model: list[T] = []
         for item_model in self.LIST_MODEL:
             new_list_model.append(item_model.get_clone())
         return ListIPAddress(new_list_model)

@@ -1,5 +1,5 @@
 from typing import Generic, TypeVar
-from library_architecture_mvvm_modify_python import BaseModel, BaseListModel, BaseModelWNamedWNamedWNamedIterator, CurrentModelWIndex, debug_print
+from library_architecture_mvvm_modify_python import *
 
 class UserBalance(BaseModel):
     def __init__(self, username: str, money: int) -> None:
@@ -20,7 +20,7 @@ class ListUserBalance(Generic[T],BaseListModel[T]):
         super().__init__(list_model)
     
     def get_clone(self) -> 'ListUserBalance':
-        new_list_model = list[T]
+        new_list_model: list[T] = []
         for item_model in self.LIST_MODEL:
             new_list_model.append(item_model.get_clone())
         return ListUserBalance(new_list_model)

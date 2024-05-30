@@ -4,8 +4,8 @@ setup(
     name="example",
     version="0.0.1",
     install_requires=[
-        "library_architecture_mvvm_modify_python",
-        "requests"
+        "library-architecture-mvvm-modify-python",
+        "requests==2.32.3"
     ],
     entry_points={
         "console_scripts": [
