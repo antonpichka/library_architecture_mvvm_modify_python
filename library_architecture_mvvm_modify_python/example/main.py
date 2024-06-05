@@ -138,8 +138,8 @@ class MainVM():
     
     async def init(self) -> None:
         self.__NAMED_STREAM_W_STATE.listen_stream_data_for_named_from_callback(self.__listen_stream_data_w_named_w_callback)
-        result = await self.__RWT_MODE.get_named_callback_from_name("init").CALLBACK()
-        debug_print("MainVM: " + result)
+        callback = await self.__RWT_MODE.get_named_callback_from_name("init").CALLBACK()
+        debug_print("MainVM: " + callback)
         self.__NAMED_STREAM_W_STATE.notify_stream_data_for_named()
 
     def dispose(self) -> None:

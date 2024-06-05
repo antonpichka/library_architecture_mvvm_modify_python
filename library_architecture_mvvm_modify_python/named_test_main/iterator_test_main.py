@@ -35,7 +35,7 @@ class UserBalanceWOrderByDescWMoneyIterator(Generic[T],BaseModelWNamedWNamedWNam
     def __init__(self) -> None:
         super().__init__()
     
-    def current_model_w_index(self) -> CurrentModelWIndex[T]:
+    def _current_model_w_index(self) -> CurrentModelWIndex[T]:
         clone = self._LIST_MODEL_ITERATOR[0].get_clone()
         if(len(self._LIST_MODEL_ITERATOR) <= 1):
             return CurrentModelWIndex[T](clone,0)

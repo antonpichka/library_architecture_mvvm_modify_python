@@ -185,7 +185,7 @@ class BaseModel(ABC):
 QBASEMODEL = TypeVar("QBASEMODEL", bound=BaseModel)
 
 @final
-class CurrentModelWIndex(Generic[QBASEMODEL], ABC):
+class CurrentModelWIndex(Generic[QBASEMODEL]):
     def __init__(self, current_model: QBASEMODEL, index: int) -> None:
         self.CURRENT_MODEL: QBASEMODEL = current_model
         self.INDEX: int = index
@@ -195,7 +195,7 @@ class BaseModelWNamedWNamedWNamedIterator(Generic[QBASEMODEL], ABC):
         self._LIST_MODEL_ITERATOR: list[QBASEMODEL] = []
     
     @abstractmethod
-    def current_model_w_index(self) -> CurrentModelWIndex[QBASEMODEL]:
+    def _current_model_w_index(self) -> CurrentModelWIndex[QBASEMODEL]:
         pass
 
     def get_sorted_list_model_from_new_list_model_parameter_list_model_iterator(self, new_list_model: list[QBASEMODEL]) -> list[QBASEMODEL]:
@@ -204,7 +204,7 @@ class BaseModelWNamedWNamedWNamedIterator(Generic[QBASEMODEL], ABC):
         self._LIST_MODEL_ITERATOR.extend(new_list_model)
         new_list_model_first = []
         while len(self._LIST_MODEL_ITERATOR) > 0:
-            current_model_w_index = self.current_model_w_index()
+            current_model_w_index = self._current_model_w_index()
             self._LIST_MODEL_ITERATOR.pop(current_model_w_index.INDEX)
             new_list_model_first.append(current_model_w_index.CURRENT_MODEL)
         return new_list_model_first
@@ -456,7 +456,7 @@ class RWTMode():
     def get_named_callback_from_name(self, name: str) -> NamedCallback:
         dict_str_w_named_callback_where_select_mod_parameters_three = self.__get_dict_str_w_named_callback_where_select_mod_parameters_three()
         if dict_str_w_named_callback_where_select_mod_parameters_three.get(name) is None:
-            raise LocalException("RWTMode",EnumGuilty.DEVELOPER,"RWTModeQQGetNamedCallbackFromName","no exists key: " + name)
+            raise LocalException("RWTMode",EnumGuilty.DEVELOPER,"RWTModeQQGetNamedCallbackFromName","No exists key: " + name)
         return dict_str_w_named_callback_where_select_mod_parameters_three.get(name)
 
     def __get_dict_str_w_named_callback_where_select_mod_parameters_three(self) -> dict[str,NamedCallback]:
