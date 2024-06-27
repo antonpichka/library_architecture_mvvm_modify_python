@@ -5,31 +5,21 @@ from typing import Generic, TypeVar, final
 from library_architecture_mvvm_modify_python import *
 
 @final
+class ReadyDataUtility():
+    UNKNOWN: str = "UNKNOWN"
+    SUCCESS: str = "SUCCESS"
+    IP_API: str = "https://jsonip.com/"
+
+    def __init__(self):
+        pass
+
+    def __init__(self):
+        pass
+
+@final
 class KeysHttpServiceUtility():
     # IPAddress #
     IP_ADDRESS_QQ_IP: str = "ip"
-
-    def __init__(self):
-        pass
-
-    def __init__(self):
-        pass
-
-@final
-class KeysExceptionUtility():
-    # UNKNOWN #
-    UNKNOWN = "UNKNOWN"
-
-    def __init__(self):
-        pass
-
-    def __init__(self):
-        pass
-
-@final
-class KeysSuccessUtility():
-    # SUCCESS #
-    SUCCESS = "SUCCESS"
 
     def __init__(self):
         pass
@@ -65,6 +55,8 @@ class ListIPAddress(Generic[T],BaseListModel[T]):
         for item_model in self.LIST_MODEL:
             str_list_model += item_model.to_string() + ",\n"
         return "ListIPAddress(listModel: [" + str_list_model + "])"
+    
+Y = TypeVar("Y", bound=ListIPAddress)    
 
 ### This class needs to be called where there are network requests (in the data source), 
 ### since without this class the developer will not know in which class the network requests are
@@ -78,23 +70,44 @@ class HttpService():
             return cls.__instance
         return cls.__instance
 
-class GetEEIPAddressEEWhereJsonipAPIEEParameterHttpService():
-    def __init__(self) -> None:
+class IPAddressRepository(Generic[T,Y], BaseModelRepository[T,Y]):
+    def __init__(self, enum_rwt_mode: EnumRWTMode) -> None:
+        super().__init__(enum_rwt_mode)
         self._http_service: HttpService = HttpService()
-
-    async def get_ip_address_where_jsonip_api_parameter_http_service(self) -> Result:
+    
+    def _get_base_model_from_map_and_list_keys(self, map: dict[str, object], list_keys: list[str]) -> T:
+        if len(list_keys) <= 0:
+            return IPAddress("")
+        if(map.get(list_keys[0]) is None):
+            return IPAddress("")
+        return IPAddress(map.get(list_keys[0]))
+    
+    def _get_base_list_model_from_list_model(self, list_model: list[T]) -> Y:
+        return ListIPAddress(list_model)
+    
+    async def get_ip_address_parameter_http_service(self) -> Result:
+        return await self._get_mode_callback_from_release_callback_and_test_callback_parameter_enum_rwt_mode(
+            self.__get_ip_address_parameter_http_service_w_release_callback,
+            self.__get_ip_address_parameter_http_service_w_test_callback)()
+    
+    async def __get_ip_address_parameter_http_service_w_release_callback(self) -> Result:
         try:
-            response: requests.Response = requests.request("GET","https://jsonip.com/")
+            response: requests.Response = requests.request("GET",ReadyDataUtility.IP_API)
             if response.status_code != 200:
-                raise NetworkException.from_key_and_status_code("GetEEIPAddressEEWhereJsonipAPIEEParameterHttpService",str(response.status_code),response.status_code)
+                raise NetworkException.from_key_and_status_code("IPAddressRepository",str(response.status_code),response.status_code)
             json: dict[str,object] = response.json()
-            ip_address = IPAddress(json.get(KeysHttpServiceUtility.IP_ADDRESS_QQ_IP))
-            return Result.success(ip_address)
+            return Result.success(self._get_base_model_from_map_and_list_keys(
+                json,[KeysHttpServiceUtility.IP_ADDRESS_QQ_IP]))
         except NetworkException as network_exception:
              return Result.exception(network_exception)
         except Exception as exception:
-            return Result.exception(LocalException("GetEEIPAddressEEWhereJsonipAPIEEParameterHttpService",EnumGuilty.DEVICE,KeysExceptionUtility.UNKNOWN,str(exception)))
-        
+            return Result.exception(LocalException("IPAddressRepository",EnumGuilty.DEVICE,ReadyDataUtility.UNKNOWN,str(exception)))
+    
+    async def __get_ip_address_parameter_http_service_w_test_callback(self) -> Result:
+        await asyncio.sleep(1)
+        return Result.success(self._get_base_model_from_map_and_list_keys(
+            {KeysHttpServiceUtility.IP_ADDRESS_QQ_IP : "121.121.12.12"},
+            [KeysHttpServiceUtility.IP_ADDRESS_QQ_IP]))
 @final
 class EnumDataForMainVM(Enum):
     IS_LOADING = "isLoading"
@@ -120,26 +133,18 @@ class DataForMainVM(BaseDataForNamed[EnumDataForMainVM]):
 @final
 class MainVM():
     def __init__(self) -> None:
-        ## OperationEEModel(EEWhereNamed)[EEFromNamed]EEParameterNamedService
-        self.__GET_EE_IP_ADDRESS_EE_WHERE_JSONIP_API_EE_PARAMETER_HTTP_SERVICE: GetEEIPAddressEEWhereJsonipAPIEEParameterHttpService = GetEEIPAddressEEWhereJsonipAPIEEParameterHttpService()
+        ## ModelRepository
+        self.__IP_ADDRESS_REPOSITORY: IPAddressRepository = IPAddressRepository(EnumRWTMode.RELEASE)
+        
         ## NamedUtility
         
-        ## Main objects 
+        ## NamedStreamWState 
         self.__NAMED_STREAM_W_STATE: BaseNamedStreamWState[DataForMainVM] = DefaultStreamWState[DataForMainVM](DataForMainVM(True,IPAddress("")))
-        self.__RWT_MODE: RWTMode = RWTMode(
-            EnumRWTMode.RELEASE,
-            [
-                NamedCallback("init",self.__init_release_callback)
-            ],
-            [
-                NamedCallback("init",self.__init_test_callback)
-            ]
-        )
     
     async def init(self) -> None:
         self.__NAMED_STREAM_W_STATE.listen_stream_data_for_named_from_callback(self.__listen_stream_data_w_named_w_callback)
-        callback = await self.__RWT_MODE.get_named_callback_from_name("init").CALLBACK()
-        debug_print("MainVM: " + callback)
+        first_request = await self.__first_request()
+        debug_print("MainVM: " + first_request)
         self.__NAMED_STREAM_W_STATE.notify_stream_data_for_named()
 
     def dispose(self) -> None:
@@ -158,23 +163,15 @@ class MainVM():
     def __listen_stream_data_w_named_w_callback(self, _: DataForMainVM) -> None:
         self.__build()
             
-    async def __init_release_callback(self) -> str:
-        get_ee_ip_address_ee_where_jsonip_api_ee_parameter_http_service = await self.__GET_EE_IP_ADDRESS_EE_WHERE_JSONIP_API_EE_PARAMETER_HTTP_SERVICE.get_ip_address_where_jsonip_api_parameter_http_service()
-        if get_ee_ip_address_ee_where_jsonip_api_ee_parameter_http_service.EXCEPTION_CONTROLLER.is_where_not_equals_null_parameter_exception():
-            return self.__first_qq_init_release_callback_qq_get_ip_address_where_jsonip_api_parameter_http_service(get_ee_ip_address_ee_where_jsonip_api_ee_parameter_http_service.EXCEPTION_CONTROLLER)
+    async def __first_request(self) -> str:
+        get_ip_address_parameter_http_service = await self.__IP_ADDRESS_REPOSITORY.get_ip_address_parameter_http_service()
+        if get_ip_address_parameter_http_service.EXCEPTION_CONTROLLER.is_where_not_equals_null_parameter_exception():
+            return self.__first_qq_first_request_qq_get_ip_address_parameter_http_service(get_ip_address_parameter_http_service.EXCEPTION_CONTROLLER)
         self.__NAMED_STREAM_W_STATE.get_data_for_named().is_loading = False
-        self.__NAMED_STREAM_W_STATE.get_data_for_named().ip_address = get_ee_ip_address_ee_where_jsonip_api_ee_parameter_http_service.PARAMETER.get_clone()
-        return KeysSuccessUtility.SUCCESS
-         
-    async def __init_test_callback(self) -> str:
-        ## Simulation get "IPAddress"
-        ip_address = IPAddress("121.121.12.12")
-        await asyncio.sleep(1)
-        self.__NAMED_STREAM_W_STATE.get_data_for_named().is_loading = False
-        self.__NAMED_STREAM_W_STATE.get_data_for_named().ip_address = ip_address.get_clone()
-        return KeysSuccessUtility.SUCCESS
+        self.__NAMED_STREAM_W_STATE.get_data_for_named().ip_address = get_ip_address_parameter_http_service.PARAMETER.get_clone()
+        return ReadyDataUtility.SUCCESS
     
-    def __first_qq_init_release_callback_qq_get_ip_address_where_jsonip_api_parameter_http_service(self,exception_controller: ExceptionController) -> str:
+    def __first_qq_first_request_qq_get_ip_address_parameter_http_service(self, exception_controller: ExceptionController) -> str:
         self.__NAMED_STREAM_W_STATE.get_data_for_named().is_loading = False
         self.__NAMED_STREAM_W_STATE.get_data_for_named().exception_controller = exception_controller
         return exception_controller.get_key_parameter_exception()

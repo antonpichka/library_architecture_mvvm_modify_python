@@ -9,6 +9,7 @@
 - [Example](https://github.com/antonpichka/library_architecture_mvvm_modify_python/tree/main/library_architecture_mvvm_modify_python#example)
 - [Template For LAMM](https://github.com/antonpichka/library_architecture_mvvm_modify_python/tree/main/library_architecture_mvvm_modify_python#template-for-lamm)
 - [Documentation](https://github.com/antonpichka/library_architecture_mvvm_modify/tree/main/package#documentation)
+- [Documentation Explanation](https://github.com/antonpichka/library_architecture_mvvm_modify/tree/main/package#documentation-explanation)
 
 ## Example
 

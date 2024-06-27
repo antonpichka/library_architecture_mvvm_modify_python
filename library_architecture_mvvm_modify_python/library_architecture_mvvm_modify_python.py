@@ -433,36 +433,26 @@ class EnumRWTMode(Enum):
     RELEASE = "release"
     TEST = "test"
 
-@final
-class NamedCallback():
-    def __init__(self, name: str, callback: object) -> None:
-        self.NAME: str = name
-        self.CALLBACK: object = callback
+QBASELISTMODEL = TypeVar("QBASELISTMODEL", bound=BaseListModel)
 
-@final
-class RWTMode():
-    def __init__(self, enum_rwt_mode: EnumRWTMode, list_named_callback_w_release: list[NamedCallback], list_named_callback_w_test: list[NamedCallback]) -> None:
-        self.__ENUM_RWT_MODE: EnumRWTMode = enum_rwt_mode
-        self.__DICT_STR_W_NAMED_CALLBACK_W_RELEASE: dict[str,NamedCallback] = RWTMode.__get_dict_str_w_named_callback_from_list_named_callback(list_named_callback_w_release)
-        self.__DICT_STR_W_NAMED_CALLBACK_W_TEST: dict[str,NamedCallback] = RWTMode.__get_dict_str_w_named_callback_from_list_named_callback(list_named_callback_w_test)
+class BaseModelRepository(Generic[QBASEMODEL,QBASELISTMODEL], ABC):
+    def __init__(self, enum_rwt_mode: EnumRWTMode) -> None:
+        self.ENUM_RWT_MODE: EnumRWTMode = enum_rwt_mode
     
-    @staticmethod
-    def __get_dict_str_w_named_callback_from_list_named_callback(list_named_callback: list[NamedCallback]) -> dict[str,NamedCallback]:
-        dict_str_w_named_callback = dict[str,NamedCallback]()
-        for item_named_callback in list_named_callback:
-            dict_str_w_named_callback[item_named_callback.NAME] = item_named_callback
-        return dict_str_w_named_callback
-    
-    def get_named_callback_from_name(self, name: str) -> NamedCallback:
-        dict_str_w_named_callback_where_select_mod_parameters_three = self.__get_dict_str_w_named_callback_where_select_mod_parameters_three()
-        if dict_str_w_named_callback_where_select_mod_parameters_three.get(name) is None:
-            raise LocalException("RWTMode",EnumGuilty.DEVELOPER,"RWTModeQQGetNamedCallbackFromName","No exists key: " + name)
-        return dict_str_w_named_callback_where_select_mod_parameters_three.get(name)
+    @abstractmethod
+    def _get_base_model_from_map_and_list_keys(self, map: dict[str,object], list_keys: list[str]) -> QBASEMODEL:
+        pass
 
-    def __get_dict_str_w_named_callback_where_select_mod_parameters_three(self) -> dict[str,NamedCallback]:
-        if self.__ENUM_RWT_MODE == EnumRWTMode.RELEASE:
-            return self.__DICT_STR_W_NAMED_CALLBACK_W_RELEASE
-        return self.__DICT_STR_W_NAMED_CALLBACK_W_TEST
+    @abstractmethod
+    def _get_base_list_model_from_list_model(self, list_model: list[QBASEMODEL]) -> QBASELISTMODEL:
+        pass
+
+    def _get_mode_callback_from_release_callback_and_test_callback_parameter_enum_rwt_mode(self, release_callback: object, test_callback: object) -> object:
+        match self.ENUM_RWT_MODE:
+            case EnumRWTMode.RELEASE:
+                return release_callback
+            case EnumRWTMode.TEST:
+                return test_callback
 
 @final
 class Result():
