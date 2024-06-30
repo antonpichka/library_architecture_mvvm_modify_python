@@ -5,6 +5,19 @@ from typing import Generic, TypeVar, final
 from library_architecture_mvvm_modify_python import *
 
 @final
+class FactoryObjectUtility():
+    def __init__(self):
+        pass
+
+    def __init__(self):
+        pass
+
+    # ModelRepository #
+    @staticmethod
+    def get_ip_address_repository() -> 'IPAddressRepository':
+        return IPAddressRepository()
+
+@final
 class ReadyDataUtility():
     UNKNOWN: str = "UNKNOWN"
     SUCCESS: str = "SUCCESS"
@@ -71,43 +84,46 @@ class HttpService():
         return cls.__instance
 
 class IPAddressRepository(Generic[T,Y], BaseModelRepository[T,Y]):
-    def __init__(self, enum_rwt_mode: EnumRWTMode) -> None:
-        super().__init__(enum_rwt_mode)
+    def __init__(self) -> None:
+        super().__init__()
         self._http_service: HttpService = HttpService()
     
     def _get_base_model_from_map_and_list_keys(self, map: dict[str, object], list_keys: list[str]) -> T:
-        if len(list_keys) <= 0:
-            return IPAddress("")
-        if(map.get(list_keys[0]) is None):
-            return IPAddress("")
-        return IPAddress(map.get(list_keys[0]))
+        return IPAddress(
+            self._get_safe_value_where_used_in_method_get_model_from_map_and_list_keys_and_index_and_default_value(
+                map, list_keys, 0, ""))
     
     def _get_base_list_model_from_list_model(self, list_model: list[T]) -> Y:
         return ListIPAddress(list_model)
     
     async def get_ip_address_parameter_http_service(self) -> Result:
         return await self._get_mode_callback_from_release_callback_and_test_callback_parameter_enum_rwt_mode(
-            self.__get_ip_address_parameter_http_service_w_release_callback,
-            self.__get_ip_address_parameter_http_service_w_test_callback)()
+            self._get_ip_address_parameter_http_service_w_release_callback,
+            self._get_ip_address_parameter_http_service_w_test_callback)()
     
-    async def __get_ip_address_parameter_http_service_w_release_callback(self) -> Result:
+    async def _get_ip_address_parameter_http_service_w_release_callback(self) -> Result:
         try:
             response: requests.Response = requests.request("GET",ReadyDataUtility.IP_API)
             if response.status_code != 200:
                 raise NetworkException.from_key_and_status_code("IPAddressRepository",str(response.status_code),response.status_code)
             json: dict[str,object] = response.json()
             return Result.success(self._get_base_model_from_map_and_list_keys(
-                json,[KeysHttpServiceUtility.IP_ADDRESS_QQ_IP]))
+                json,
+                self._get_ip_address_parameter_http_service_w_list_keys()))
         except NetworkException as network_exception:
              return Result.exception(network_exception)
         except Exception as exception:
             return Result.exception(LocalException("IPAddressRepository",EnumGuilty.DEVICE,ReadyDataUtility.UNKNOWN,str(exception)))
     
-    async def __get_ip_address_parameter_http_service_w_test_callback(self) -> Result:
+    async def _get_ip_address_parameter_http_service_w_test_callback(self) -> Result:
         await asyncio.sleep(1)
         return Result.success(self._get_base_model_from_map_and_list_keys(
             {KeysHttpServiceUtility.IP_ADDRESS_QQ_IP : "121.121.12.12"},
-            [KeysHttpServiceUtility.IP_ADDRESS_QQ_IP]))
+            self._get_ip_address_parameter_http_service_w_list_keys()))
+    
+    def _get_ip_address_parameter_http_service_w_list_keys(self) -> list[str]:
+        return [KeysHttpServiceUtility.IP_ADDRESS_QQ_IP]
+
 @final
 class EnumDataForMainVM(Enum):
     IS_LOADING = "isLoading"
@@ -134,7 +150,7 @@ class DataForMainVM(BaseDataForNamed[EnumDataForMainVM]):
 class MainVM():
     def __init__(self) -> None:
         ## ModelRepository
-        self.__IP_ADDRESS_REPOSITORY: IPAddressRepository = IPAddressRepository(EnumRWTMode.RELEASE)
+        self.__IP_ADDRESS_REPOSITORY: IPAddressRepository = FactoryObjectUtility.get_ip_address_repository()
         
         ## NamedUtility
         
@@ -177,6 +193,7 @@ class MainVM():
         return exception_controller.get_key_parameter_exception()
 
 async def main() -> None:
+    BaseModelRepository.enum_rwt_mode = EnumRWTMode.RELEASE
     main_vm = MainVM()
     await main_vm.init()
     main_vm.dispose()

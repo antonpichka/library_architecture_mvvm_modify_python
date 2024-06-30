@@ -436,8 +436,10 @@ class EnumRWTMode(Enum):
 QBASELISTMODEL = TypeVar("QBASELISTMODEL", bound=BaseListModel)
 
 class BaseModelRepository(Generic[QBASEMODEL,QBASELISTMODEL], ABC):
-    def __init__(self, enum_rwt_mode: EnumRWTMode) -> None:
-        self.ENUM_RWT_MODE: EnumRWTMode = enum_rwt_mode
+    enum_rwt_mode: EnumRWTMode = EnumRWTMode.TEST
+
+    def __init__(self) -> None:
+        pass
     
     @abstractmethod
     def _get_base_model_from_map_and_list_keys(self, map: dict[str,object], list_keys: list[str]) -> QBASEMODEL:
@@ -448,11 +450,20 @@ class BaseModelRepository(Generic[QBASEMODEL,QBASELISTMODEL], ABC):
         pass
 
     def _get_mode_callback_from_release_callback_and_test_callback_parameter_enum_rwt_mode(self, release_callback: object, test_callback: object) -> object:
-        match self.ENUM_RWT_MODE:
+        match BaseModelRepository.enum_rwt_mode:
             case EnumRWTMode.RELEASE:
                 return release_callback
             case EnumRWTMode.TEST:
                 return test_callback
+    
+    def _get_safe_value_where_used_in_method_get_model_from_map_and_list_keys_and_index_and_default_value(self, map: dict[str,object], list_keys: list[str], index: int, default_value: object) -> object:
+        try:
+            if(map.get(list_keys[index]) is None):
+                return default_value
+            return map.get(list_keys[index])
+        except Exception as _:
+            return default_value
+
 
 @final
 class Result():
