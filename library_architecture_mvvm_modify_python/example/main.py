@@ -16,6 +16,11 @@ class FactoryObjectUtility():
     @staticmethod
     def get_ip_address_repository() -> 'IPAddressRepository':
         return IPAddressRepository()
+    
+    # NamedStreamWState #
+    @staticmethod
+    def get_named_stream_w_state_where_data_w_main_vm() -> 'BaseNamedStreamWState':
+        return DefaultStreamWState[DataForMainVM](DataForMainVM(True,IPAddress("")))
 
 @final
 class ReadyDataUtility():
@@ -155,7 +160,7 @@ class MainVM():
         ## NamedUtility
         
         ## NamedStreamWState 
-        self.__NAMED_STREAM_W_STATE: BaseNamedStreamWState[DataForMainVM] = DefaultStreamWState[DataForMainVM](DataForMainVM(True,IPAddress("")))
+        self.__NAMED_STREAM_W_STATE: BaseNamedStreamWState[DataForMainVM] = FactoryObjectUtility.get_named_stream_w_state_where_data_w_main_vm()
     
     async def init(self) -> None:
         self.__NAMED_STREAM_W_STATE.listen_stream_data_for_named_from_callback(self.__listen_stream_data_w_named_w_callback)

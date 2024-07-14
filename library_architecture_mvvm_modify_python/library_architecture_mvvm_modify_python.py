@@ -416,7 +416,7 @@ class TempCacheService:
     def update_from_key_temp_cache_and_value_parameter_temp_cache(self, key_temp_cache: str, value: object) -> None:
         self.__temp_cache[key_temp_cache] = value
 
-    def update_where_stream_notification_is_possible_from_key_temp_cache_and_value_parameter_one(self, key_temp_cache: str, value: object) -> None:
+    def update_w_notification_from_key_temp_cache_and_value_parameter_one(self, key_temp_cache: str, value: object) -> None:
         self.update_from_key_temp_cache_and_value_parameter_temp_cache(key_temp_cache,value)
         temp_cache_w_list_action: dict[str,list[Callable[[object], None]]] = self.__temp_cache_w_list_action
         if temp_cache_w_list_action.get(key_temp_cache) is None:
